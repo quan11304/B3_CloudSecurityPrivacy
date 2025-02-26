@@ -1,0 +1,117 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .register-container {
+    background-color: #121212;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    width: 400px;
+    align-items: center;
+  }
+  
+  h2 {
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 1rem;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 20px;
+    border: 1px solid #666;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+    align-items: center;
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border: 1px solid #1db954;
+  }
+  
+  .phone-login {
+    color: #1db954;
+    text-decoration: none;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 15px;
+  }
+  
+  .phone-login:hover {
+    text-decoration: underline;
+  }
+  
+  .badge.dark-badge.register-btn {
+    width: 100%;
+    background-color: #1db954;
+    border: none;
+    padding: 15px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    color: black;
+  }
+  
+  .badge.dark-badge.register-btn:hover {
+    background-color: #1ed760;
+  }
+  
+  .separator {
+    margin: 20px 0;
+    text-transform: uppercase;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  
+  .social-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid white;
+    border-radius: 50px;
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .social-login:hover {
+    background-color: #333;
+  }
+  
+  .signup-link {
+    color: #1db954;
+    text-decoration: none;
+    font-size: 14px;
+    display: block;
+    margin-top: 15px;
+  }
+  
+  .signup-link:hover {
+    text-decoration: underline;
+  }
+  
