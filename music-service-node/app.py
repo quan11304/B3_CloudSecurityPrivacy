@@ -69,7 +69,12 @@ def register():
 
 @app.route('/users/me', methods=['GET'])
 def get_current_user():
-    response = requests.get("http://management-user-service:8084/users/me")
+    auth_token = request.cookies.get('session_token')
+    if not auth_token:
+            return jsonify({"error": "Missing Authorization"}), 401
+        
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    response = requests.get("http://management-user-service:8084/users/me", headers=headers)
     return response.json(), response.status_code
 
 @app.route('/users/me', methods=['PUT'])
@@ -79,6 +84,7 @@ def update_user():
         'username': request.form.get('username'),
         'password': request.form.get('password')
     }
+
     response = requests.put("http://management-user-service:8084/users/me", json=data)
     return response.json(), response.status_code
 

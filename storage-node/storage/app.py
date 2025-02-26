@@ -28,11 +28,11 @@ def upload_file():
 
 @app.route('/files/<file_id>', methods=['GET'])
 def download_file(file_id):
-    try:
-        file_path, filename = file_storage.get_file_path(file_id)
-        return send_file(file_path, as_attachment=True, download_name=filename)
-    except FileNotFoundError:
-        return jsonify({"error": "File not found"}), 404
+        try:
+            file_path, filename = file_storage.get_file_path(file_id)
+            return send_file(file_path, as_attachment=True, download_name=filename)
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404
         
 @app.route('/metadata/<file_id>', methods=['GET']   )
 def get_metadata(file_id):

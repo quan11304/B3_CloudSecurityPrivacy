@@ -27,12 +27,10 @@ class FileStorage:
         }
     
     def get_file_path(self, file_id):
-        pattern = os.path.join(self.storage_path, f"{file_id}.*")
-        matches = glob.glob(pattern)
-        if not matches:
-            raise FileNotFoundError(f"File with ID {file_id} not found")
+        file_path = os.path.join(self.storage_path, f"{file_id}")
+        if not os.path.exists(file_path):
+            return None, None
         
-        file_path = matches[0]
         _, ext = os.path.splitext(file_path)
         filename = f"{file_id}{ext}"
         return file_path, filename
