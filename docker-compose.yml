@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  database-service:
+    build: ./storage-node/database
+    ports:
+      - "3306:3306"
+    networks:
+      - music-network
+
+  music-service-node:
+    build: ./music-service-node
+    ports:
+      - "8080:8080"
+    networks:
+      - music-network
+    depends_on:
+      - database-service
+      - management-user-service
+      - storage-service
+
+  management-user-service:
+    build: ./management-node/management
+    ports:
+      - "8084:8084"
+    networks:
+      - music-network
+    depends_on:
+      - database-service
+
+  storage-service:
+    build: ./storage-node/storage
+    ports:
+      - "8083:8083"
+    volumes:
+      - storage-data:/data
+    networks:
+      - music-network
+
+networks:
+  music-network:
+    driver: bridge
+
+volumes:
+  storage-data:
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Music Service Node</title>
+    </head>
+</html>
+<link rel="stylesheet" href="/templates/styles.css">
+<h1>Music Service Node</h1>
+<p>Welcome to the Music Service Node</p>
+<p>This is the music service node for the music service</p>
+<p>The music service is a service that allows you to manage your music</p>
+<p>The music service is a service that allows you to manage your music</p>
+<p>The music service is a service that allows you to manage your music</p>
+
+
+{% if message %}
+    <p>{{ message }}</p>
+{% endif %}
+
+<h2>Login</h2>
+<form action="/login" method="post">
+    <input type="text" name="username" placeholder="Username">
+    <input type="password" name="password" placeholder="Password">
+    <button type="submit">Login</button>
+</form>
+
+<h2>Register</h2>
+<form action="/register" method="post">
+    <input type="text" name="username" placeholder="Username">
+    <input type="password" name="password" placeholder="Password">
+    <input type="email" name="email" placeholder="Email">
+    <button type="submit">Register</button>
+</form>
