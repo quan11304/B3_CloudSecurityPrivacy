@@ -1,7 +1,7 @@
 import mysql.connector
-import uuid
-import hashlib
 import time
+from passlib.hash import pbkdf2_sha256
+
 class Database:
     def __init__(self, host='database-service', user='root', password='root', database='musicdb'):
         self.host = host
@@ -46,14 +46,24 @@ class Database:
         self.cursor.execute("""
         INSERT INTO users (username, email, password_hash)
         VALUES (%s, %s, %s)
-        RETURNING user_id, username, email, created_at
         """, (username, email, password_hash))
+        
+        # Get the last inserted ID
+        user_id = self.cursor.lastrowid
         self.connection.commit()
+        
+        # Fetch the user data after insert
+        self.cursor.execute("""
+        SELECT user_id, username, email, created_at
+        FROM users WHERE user_id = %s
+        """, (user_id,))
+        
         return self.cursor.fetchone()
+
 
     def authenticate_user(self, username, password):
         self.cursor.execute("""
-        SELECT user_id, username, email
+        SELECT user_id, username, email, password_hash
         FROM users
         WHERE username = %s 
         """, (username,))
@@ -137,12 +147,10 @@ class Database:
         return self.cursor.rowcount > 0
     
     def _hash_password(self, password):
-        salt = uuid.uuid4().hex
-        return hashlib.sha512(salt.encode() + password.encode()).hexdigest() + ':' + salt
+        return pbkdf2_sha256.hash(password)
     
     def _verify_password(self, password_hash, password):
-        password_hash, salt = password_hash.split(':')
-        return password_hash == hashlib.sha512(salt.encode() + password.encode()).hexdigest()
+        return pbkdf2_sha256.verify(password, password_hash)
 
 
 ############################# END OF USER MANAGEMENT #############################
@@ -186,10 +194,14 @@ class Database:
         self.cursor.execute("""
                 INSERT INTO songs (title, album_id, artist_id, duration, file_path, genre)
                 VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING song_id
-            """, (title, album_id, artist_id, duration, file_path, genre))
+                """, (title, album_id, artist_id, duration, file_path, genre))
+        
+        # Get the last inserted ID
+        song_id = self.cursor.lastrowid
         self.connection.commit()
-        return self.cursor.fetchone()
+        
+        # Return the song ID
+        return {"song_id": song_id}
     
 
 

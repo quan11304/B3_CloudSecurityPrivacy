@@ -16,7 +16,10 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.json
+    data = {
+        'username': request.form.get('username'),
+        'password': request.form.get('password')
+    }
     response = requests.post("http://management-user-service:8084/login", json=data)
     if response.status_code == 200:
         return render_template('dashboard.html')
@@ -51,13 +54,21 @@ def get_current_user():
 
 @app.route('/users/me', methods=['PUT'])
 def update_user():
-    data = request.json
+    # Get form data instead of JSON data
+    data = {
+        'username': request.form.get('username'),
+        'password': request.form.get('password')
+    }
     response = requests.put("http://management-user-service:8084/users/me", json=data)
     return response.json(), response.status_code
 
 @app.route('/users/me/password', methods=['PUT'])
 def change_password():
-    data = request.json
+    # Get form data instead of JSON data
+    data = {
+        'username': request.form.get('username'),
+        'password': request.form.get('password')
+    }
     response = requests.put("http://management-user-service:8084/users/me/password", json=data)
     return response.json(), response.status_code
 
@@ -83,6 +94,7 @@ def get_artist_songs(artist_id):
 @app.route('/songs', methods=['POST'])
 def add_song():
     data = request.json
+
     response = requests.post("http://management-user-service:8084/songs", data=data)
     return response.json(), response.status_code
 

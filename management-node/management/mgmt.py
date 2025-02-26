@@ -4,6 +4,11 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, creat
 import os
 
 app = Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'hsw109')  # Change this in production!
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # Token expires in 1 hour
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+
 db = Database()
 jwt = JWTManager(app)
 
@@ -33,8 +38,8 @@ def register():
     
     user = db.create_user(
         data['username'],
-        data['email'],
-        data['password']
+        data['password'],
+        data['email']
     )
     
     return jsonify({
