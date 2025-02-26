@@ -110,11 +110,18 @@
             opacity: 0;
             transition: all 0.3s;
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            cursor: pointer;
+            text-decoration: none;
         }
 
         .song-card:hover .play-icon {
             opacity: 1;
             transform: translateY(-8px);
+        }
+
+        .play-icon:hover {
+            background: #1ed760;
+            transform: scale(1.1);
         }
 
         .nav-item {
@@ -205,11 +212,11 @@
                     <div class="song-info">Artist ID: {{ song.artist_id }}</div>
                     <div class="song-info">Album ID: {{ song.album_id }}</div>
                     <div class="genre-tag">{{ song.genre }}</div>
-                    <div class="play-icon" href="/api/stream/{{ song.song_id }}">
+                    <a href="/api/stream/{{ song.song_id }}" class="play-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                             <path d="M8 5v14l11-7z"/>
                         </svg>
-                    </div>
+                    </a>
                 </div>
             </div>
             {% endfor %}
