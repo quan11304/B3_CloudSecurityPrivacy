@@ -25,9 +25,21 @@ def login():
     
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.json
-    response = requests.post("http://management-user-service:8084/register", data=data)
-    if response.status_code == 200:
+    # Get form data instead of JSON data
+    data = {
+        'username': request.form.get('username'),
+        'password': request.form.get('password'),
+        'email_address': request.form.get('email_address')
+    }
+    
+    required_fields = ['username', 'password', 'email_address']
+    
+    for field in required_fields:
+        if not data[field]:
+            return render_template('index.html', message=f"Missing required field: {field}"), 400
+            
+    response = requests.post("http://management-user-service:8084/register", json=data)
+    if response.status_code == 200 or response.status_code == 201:
         return render_template('index.html', message="User registered successfully")
     else:
         return render_template('index.html', message=response.content.decode('utf-8'))

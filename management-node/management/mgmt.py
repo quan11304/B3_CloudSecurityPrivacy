@@ -24,11 +24,6 @@ def login():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-
-    required_fields = ['username', 'password', 'email']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"error": f"Missing required field: {field}"}), 400
     
     if db.get_user_by_username(data['username']):
         return jsonify({"error": "Username already exists"}), 409
