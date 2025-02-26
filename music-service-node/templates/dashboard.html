@@ -209,8 +209,8 @@
                 <div class="song-card-container">
                     <div class="duration-badge">{{ song.duration }}s</div>
                     <div class="song-title">{{ song.title }}</div>
-                    <div class="song-info">Artist ID: {{ song.artist_id }}</div>
-                    <div class="song-info">Album ID: {{ song.album_id }}</div>
+                    <div class="song-info">Artist: {{ song.artist }}</div>
+                    <div class="song-info">Album: {{ song.album }}</div>
                     <div class="genre-tag">{{ song.genre }}</div>
                     <a href="/api/stream/{{ song.song_id }}" class="play-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white">

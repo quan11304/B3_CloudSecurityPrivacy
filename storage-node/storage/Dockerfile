@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 
+COPY init_music/*.mp3 ../storage/
+
 RUN pip install -r requirements.txt
 
 COPY . .

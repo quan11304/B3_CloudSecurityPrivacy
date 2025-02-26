@@ -67,10 +67,10 @@ INSERT INTO albums (title, artist_id, release_year) VALUES
 ('Thriller', 3, 1982);
 
 INSERT INTO songs (title, album_id, artist_id, duration, file_path, genre) VALUES 
-('Come Together', 1, 1, 259, '/music/come_together.mp3', 'Rock'),
-('Something', 1, 1, 182, '/music/something.mp3', 'Rock'),
-('Bohemian Rhapsody', 2, 2, 355, '/music/bohemian_rhapsody.mp3', 'Rock'),
-('Thriller', 3, 3, 357, '/music/thriller.mp3', 'Pop'),
-('Billie Jean', 3, 3, 294, '/music/billie_jean.mp3', 'Pop');
+('Come Together', 1, 1, 259, '/come_together.mp3', 'Rock'),
+('Something', 1, 1, 182, '/something.mp3', 'Rock'),
+('Bohemian Rhapsody', 2, 2, 355, '/bohemian_rhapsody.mp3', 'Rock'),
+('Thriller', 3, 3, 357, '/thriller.mp3', 'Pop'),
+('Billie Jean', 3, 3, 294, '/billie_jean.mp3', 'Pop');
 
 -- Create admin user
