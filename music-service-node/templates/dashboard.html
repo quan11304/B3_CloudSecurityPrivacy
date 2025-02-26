@@ -205,7 +205,7 @@
                     <div class="song-info">Artist ID: {{ song.artist_id }}</div>
                     <div class="song-info">Album ID: {{ song.album_id }}</div>
                     <div class="genre-tag">{{ song.genre }}</div>
-                    <div class="play-icon">
+                    <div class="play-icon" href="/api/stream/{{ song.song_id }}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                             <path d="M8 5v14l11-7z"/>
                         </svg>
