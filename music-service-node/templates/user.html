@@ -1,13 +1,216 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>User</title>
-    </head>
-</html>
+<head>
+    <title>Musify - Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-{% if user_info %}
-    <h1>User Information</h1>
-    <p>User ID: {{ user_info.user_id }}</p>
-    <p>Name: {{ user_info.username }}</p>
-    <p>Email: {{ user_info.email }}</p>
-{% endif %}
+        body {
+            background-color: #121212;
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #000000;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            flex-grow: 1;
+            background: linear-gradient(to bottom, #404040, #121212);
+            min-height: 100vh;
+        }
+
+        .logo {
+            color: #1DB954;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            color: #b3b3b3;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            color: white;
+        }
+
+        .profile-header {
+            padding: 120px 32px 32px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: flex-end;
+            gap: 24px;
+        }
+
+        .profile-picture {
+            width: 192px;
+            height: 192px;
+            border-radius: 50%;
+            background: #282828;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            color: #b3b3b3;
+            box-shadow: 0 4px 60px rgba(0,0,0,.5);
+        }
+
+        .profile-details {
+            flex-grow: 1;
+        }
+
+        .profile-type {
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .profile-name {
+            font-size: 96px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            line-height: 96px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 24px;
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .profile-stats {
+            padding: 24px 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .stat-label {
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .edit-profile {
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 32px;
+            border-radius: 500px;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .edit-profile:hover {
+            border-color: white;
+            transform: scale(1.04);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">Musify</div>
+        <nav>
+            <a href="/dashboard" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/>
+                </svg>
+                Home
+            </a>
+            <a href="#" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28z"/>
+                </svg>
+                Search
+            </a>
+            <a href="#" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V3a1 1 0 0 1 .5-.866z"/>
+                </svg>
+                Library
+            </a>
+        </nav>
+    </div>
+
+    {% if user_info %}
+    <div class="main-content">
+        <div class="profile-header">
+            <div class="profile-info">
+                <div class="profile-picture">
+                    {{ user_info.username[0].upper() }}
+                </div>
+                <div class="profile-details">
+                    <div class="profile-type">Profile</div>
+                    <h1 class="profile-name">{{ user_info.username }}</h1>
+                    <div class="profile-meta">
+                        <span>{{ user_info.email }}</span>
+                        <span>User ID: {{ user_info.user_id }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-card">
+                <div class="stat-label">Email</div>
+                <div class="stat-value">{{ user_info.email }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Username</div>
+                <div class="stat-value">{{ user_info.username }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">User ID</div>
+                <div class="stat-value">{{ user_info.user_id }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</body>
+</html>

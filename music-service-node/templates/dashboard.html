@@ -1,26 +1,219 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Dashboard</title>
-        <link rel="stylesheet" href="../statics/styles.css">
-    </head>
+<head>
+    <title>Musify - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #000000;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            flex-grow: 1;
+            padding: 24px;
+            background: linear-gradient(to bottom, #535353, #121212);
+        }
+
+        .logo {
+            color: #1DB954;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+
+        .profile-btn {
+            background: transparent;
+            border: 1px solid #ffffff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 500px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .songs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            padding: 20px 0;
+        }
+
+        .song-card {
+            background: #282828;
+            padding: 16px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .song-card:hover {
+            background: #383838;
+        }
+
+        .song-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .song-info {
+            font-size: 14px;
+            color: #b3b3b3;
+            margin-bottom: 4px;
+        }
+
+        .play-icon {
+            width: 48px;
+            height: 48px;
+            background: #1DB954;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .song-card:hover .play-icon {
+            opacity: 1;
+            transform: translateY(-8px);
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            color: #b3b3b3;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            color: white;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .song-card-container {
+            position: relative;
+        }
+
+        .duration-badge {
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+
+        .genre-tag {
+            background: #1DB954;
+            color: black;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    </style>
+</head>
 <body>
-    <h1>Welcome to Music Service Dashboard</h1>
+    <div class="sidebar">
+        <div class="logo">Musify</div>
+        <nav>
+            <a href="#" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.5 3.247a1 1 0 0 0-1 0L4 7.577V20h4.5v-6a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v6H20V7.577l-7.5-4.33z"/>
+                </svg>
+                Home
+            </a>
+            <a href="#" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28z"/>
+                </svg>
+                Search
+            </a>
+            <a href="#" class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M14.5 2.134a1 1 0 0 1 1 0l6 3.464a1 1 0 0 1 .5.866V21a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V3a1 1 0 0 1 .5-.866z"/>
+                </svg>
+                Library
+            </a>
+        </nav>
+    </div>
 
-    <h2> Profile </h2>
-    <form action="/users/me" method="GET">
-    <button type="submit">Get Profile</button>
-</form>
+    <div class="main-content">
+        <div class="profile-section">
+            <h2 class="section-title">Your Profile</h2>
+            <form action="/users/me" method="GET">
+                <button type="submit" class="profile-btn">View Profile</button>
+            </form>
+        </div>
 
-<h2> All songs!!! </h2>
-{% for song in songs %}
-    <p> {{ song.title }} </p>
-    <p> {{ song.artist_id }} </p>
-    <p> {{ song.album_id }} </p>
-    <p> {{ song.genre }} </p>
-    <p> {{ song.duration }} </p>
-    <p> {{ song.file_id }} </p>
-    <br>
-{% endfor %}
-
-
+        <h2 class="section-title">Your Library</h2>
+        <div class="songs-grid">
+            {% for song in songs %}
+            <div class="song-card">
+                <div class="song-card-container">
+                    <div class="duration-badge">{{ song.duration }}s</div>
+                    <div class="song-title">{{ song.title }}</div>
+                    <div class="song-info">Artist ID: {{ song.artist_id }}</div>
+                    <div class="song-info">Album ID: {{ song.album_id }}</div>
+                    <div class="genre-tag">{{ song.genre }}</div>
+                    <div class="play-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
