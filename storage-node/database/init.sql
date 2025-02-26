@@ -74,5 +74,3 @@ INSERT INTO songs (title, album_id, artist_id, duration, file_path, genre) VALUE
 ('Billie Jean', 3, 3, 294, '/music/billie_jean.mp3', 'Pop');
 
 -- Create admin user
-INSERT INTO users (username, email, password_hash) VALUES 
-('admin', 'admin@musicdb.local', 'admin_password');

@@ -21,8 +21,12 @@ def login():
     data = request.json
     user = db.authenticate_user(data['username'], data['password'])
     if user:
-        access_token = create_access_token(identity=user['user_id'])
-        return jsonify({"user_id": user['user_id'], "message": "User logged in successfully", "access_token": access_token}), 200
+        access_token = create_access_token(identity=user['username'])
+        return jsonify({
+            "user_id": user['user_id'],
+            "message": "User logged in successfully",
+            "access_token": access_token
+        }), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
     
@@ -51,8 +55,8 @@ def register():
 @app.route('/users/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
-    user_id = get_jwt_identity()
-    user = db.get_user_by_id(user_id)
+    username = get_jwt_identity()
+    user = db.get_user_by_username(username)
     
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -69,22 +73,22 @@ def get_current_user():
 @jwt_required()
 def update_user():
     """Update user profile"""
-    user_id = get_jwt_identity()
+    username = get_jwt_identity()
     data = request.json
     
     # Prevent updating username or email to existing ones
     if 'username' in data:
         existing_user = db.get_user_by_username(data['username'])
-        if existing_user and existing_user['user_id'] != user_id:
+        if existing_user and existing_user['username'] != username:
             return jsonify({"error": "Username already exists"}), 409
     
     if 'email' in data:
         existing_user = db.get_user_by_email(data['email'])
-        if existing_user and existing_user['user_id'] != user_id:
+        if existing_user and existing_user['username'] != username:
             return jsonify({"error": "Email already exists"}), 409
     
     # Update user
-    updated_user = db.update_user(user_id, data)
+    updated_user = db.update_user(username, data)
     
     if not updated_user:
         return jsonify({"error": "User not found"}), 404
@@ -98,7 +102,7 @@ def update_user():
 @jwt_required()
 def change_password():
     """Change user password"""
-    user_id = get_jwt_identity()
+    username = get_jwt_identity()
     data = request.json
     
     # Validate required fields
@@ -106,12 +110,12 @@ def change_password():
         return jsonify({"error": "Current password and new password required"}), 400
     
     # Verify current password
-    user = db.get_user_by_id(user_id)
+    user = db.get_user_by_username(username)
     if not user or not db.verify_password(user['password_hash'], data['current_password']):
         return jsonify({"error": "Current password is incorrect"}), 401
     
     # Update password
-    success = db.update_password(user_id, data['new_password'])
+    success = db.update_password(username, data['new_password'])
     
     if not success:
         return jsonify({"error": "Failed to update password"}), 500
@@ -142,10 +146,14 @@ def get_artist_songs(artist_id):
     songs = db.get_songs_by_artist(artist_id)
     return jsonify(songs)
 
-@app.route('/songs', methods=['POST'])
+@app.route('/api/add_song', methods=['POST'])
 @jwt_required()
 def add_song():
     """Add a new song"""
+    username = get_jwt_identity()
+    if username != 'admin':
+        return jsonify({"error": "Not admin!!!"}), 401
+    
     data = request.json
     required_fields = ['title', 'album_id', 'artist_id', 'duration', 'file_path', 'genre']
     
@@ -164,7 +172,7 @@ def add_song():
         data['genre']
     )
     
-    return jsonify({"song_id": song_id, "message": "Song added successfully"}), 201
+    return jsonify({"song_id": song_id, "message": "Song added to database successfully"}), 201
 
 
 if __name__ == '__main__':

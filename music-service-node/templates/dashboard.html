@@ -2,14 +2,46 @@
 <html>
     <head>
         <title>Dashboard</title>
+        <link rel="stylesheet" href="../statics/styles.css">
     </head>
+<body>
+    <h1>Welcome to Music Service Dashboard</h1>
+
+    <h2>Upload a new song:</h2>
+    <form id="uploadForm">
+        <input type="text" name="title" placeholder="Song Title" required>
+        <input type="number" name="artist_id" placeholder="Artist ID" required>
+        <input type="number" name="album_id" placeholder="Album ID" required>
+        <input type="text" name="genre" placeholder="Genre" required>
+        <input type="number" name="duration" placeholder="Duration (seconds)" required>
+        <input type="file" name="file" accept="audio/*" required>
+        <button type="submit">Upload</button>
+    </form>
+  
+    <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                alert('Upload successful!');
+                window.location.reload();
+            } else {
+                alert(`Upload failed: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Upload failed');
+        }
+    });
+    </script>
+</body>
 </html>
-<link rel="stylesheet" href="../statics/styles.css">
-{% if songs %}
-    <h1>Songs</h1>
-    <ul>
-        {% for song in songs %}
-            <li>{{ song.title }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}

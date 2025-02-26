@@ -81,14 +81,6 @@ class Database:
             
         return None
 
-    def get_user_by_id(self, user_id):
-        self.cursor.execute("""
-        SELECT user_id, username, email
-        FROM users
-        WHERE user_id = %s
-        """, (user_id,))
-        return self.cursor.fetchone()
-    
     def get_user_by_username(self, username):
         self.cursor.execute("""
         SELECT user_id, username, email
@@ -105,7 +97,7 @@ class Database:
         """, (email,))
         return self.cursor.fetchone()
         
-    def update_user(self, user_id, data):
+    def update_user(self, username, data):
         valid_fields = ['username', 'email']
         update_fields = []
         values = []
@@ -118,31 +110,31 @@ class Database:
         if not update_fields:
             return None
         
-        values.append(user_id)
+        values.append(username)
 
         self.cursor.execute("""
         UPDATE users
         SET {}
-        WHERE user_id = %s
+        WHERE username = %s
         """.format(', '.join(update_fields)), tuple(values))
         self.connection.commit()
         return self.cursor.fetchone()
     
-    def update_user_password(self, user_id, new_password):
+    def update_user_password(self, username, new_password):
         password_hash = self._hash_password(new_password)
         self.cursor.execute("""
         UPDATE users
         SET password_hash = %s
-        WHERE user_id = %s
-        """, (password_hash, user_id))
+        WHERE username = %s
+        """, (password_hash, username))
         self.connection.commit()
         return self.cursor.rowcount > 0
     
-    def delete_user(self, user_id):
+    def delete_user(self, username):
         self.cursor.execute("""
         DELETE FROM users
-        WHERE user_id = %s
-        """, (user_id,))
+        WHERE username = %s
+        """, (username,))
         self.connection.commit()
         return self.cursor.rowcount > 0
     
