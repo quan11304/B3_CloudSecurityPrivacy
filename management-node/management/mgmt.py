@@ -52,6 +52,14 @@ def register():
         "message": "User registered successfully"
     }), 201
 
+@app.route('/check-admin', methods=['GET'])
+@jwt_required()
+def check_admin():
+    username = get_jwt_identity()
+    if username != 'admin':
+        return jsonify({"error": "Not admin!!!"}), 401
+    return jsonify({"message": "Admin user"}), 200
+    
 @app.route('/users/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
@@ -61,13 +69,7 @@ def get_current_user():
     if not user:
         return jsonify({"error": "User not found"}), 404
     
-    user.pop('password')
-
-    return jsonify({
-        "user_id": user['user_id'],
-        "username": user['username'],
-        "email": user['email']
-    }), 200
+    return jsonify(user), 200
 
 @app.route('/users/me', methods=['PUT'])
 @jwt_required()
@@ -92,10 +94,7 @@ def update_user():
     
     if not updated_user:
         return jsonify({"error": "User not found"}), 404
-    
-    # Remove sensitive information
-    updated_user.pop('password_hash', None)
-    
+        
     return jsonify(updated_user), 200
 
 @app.route('/users/me/password', methods=['PUT'])
@@ -162,8 +161,8 @@ def add_song():
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
     
-    # Add the song
-    song_id = db.add_song(
+    # Add the song and get the returned dictionary
+    song_data = db.add_song(
         data['title'],
         data['album_id'],
         data['artist_id'],
@@ -172,8 +171,7 @@ def add_song():
         data['genre']
     )
     
-    return jsonify({"song_id": song_id, "message": "Song added to database successfully"}), 201
-
+    return jsonify(song_data), 201
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8084)

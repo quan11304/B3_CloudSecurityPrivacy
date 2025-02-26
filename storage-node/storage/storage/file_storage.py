@@ -1,7 +1,6 @@
 import os
 import time
 import mimetypes
-import glob
 from werkzeug.utils import secure_filename
 
 class FileStorage:

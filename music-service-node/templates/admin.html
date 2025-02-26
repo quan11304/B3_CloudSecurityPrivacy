@@ -1,0 +1,22 @@
+<h2>Upload a new song:</h2>
+    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Song Title" required>
+        <input type="number" name="artist_id" placeholder="Artist ID" required>
+        <input type="number" name="album_id" placeholder="Album ID" required>
+        <input type="text" name="genre" placeholder="Genre" required>
+        <input type="number" name="duration" placeholder="Duration (seconds)" required>
+        <input type="file" name="file" accept="audio/*" required>
+        <button type="submit">Upload</button>
+    </form>
+  
+
+{% if song %}
+    <h2>Uploaded song:</h2>
+    <p>Title: {{ song.title }}</p>
+    <p>Album: {{ song.album }}</p>
+    <p>Artist: {{ song.artist }}</p>
+    <p>Duration: {{ song.duration }}</p>
+    <p>Genre: {{ song.genre }}</p>
+
+    <a href="/api/stream/{{ song.song_id }}">Click here to listen</a>
+{% endif %}

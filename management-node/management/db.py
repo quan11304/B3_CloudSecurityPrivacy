@@ -187,13 +187,22 @@ class Database:
                 INSERT INTO songs (title, album_id, artist_id, duration, file_path, genre)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """, (title, album_id, artist_id, duration, file_path, genre))
-        
-        # Get the last inserted ID
+    
+    # Get the last inserted ID
         song_id = self.cursor.lastrowid
         self.connection.commit()
         
-        # Return the song ID
-        return {"song_id": song_id}
+        # Fetch complete song information including artist and album names
+        self.cursor.execute("""
+                SELECT s.song_id, s.title, a.name as artist, al.title as album, 
+                    s.duration, s.file_path, s.genre
+                FROM songs s
+                JOIN artists a ON s.artist_id = a.artist_id
+                JOIN albums al ON s.album_id = al.album_id
+                WHERE s.song_id = %s
+            """, (song_id,))
+        
+        return self.cursor.fetchone()
     
 
 

@@ -44,7 +44,21 @@ def login():
     
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    return render_template('dashboard.html')
+    response = requests.get("http://management-user-service:8084/songs")
+    return render_template('dashboard.html', songs=response.json())
+
+@app.route('/admin-dashboard', methods=['GET'])
+def admin_dashboard():
+    auth_token = request.cookies.get('session_token')
+    if not auth_token:
+        return jsonify({"error": "Missing Authorization"}), 401
+    
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    response = requests.get("http://management-user-service:8084/check-admin", headers=headers)
+    if response.status_code != 200:
+        return jsonify({"error": "Not admin!!!"}), 401
+    
+    return render_template('admin.html')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -71,41 +85,46 @@ def register():
 def get_current_user():
     auth_token = request.cookies.get('session_token')
     if not auth_token:
-            return jsonify({"error": "Missing Authorization"}), 401
-        
+        return jsonify({"error": "Missing Authorization"}), 401
+    
     headers = {'Authorization': f'Bearer {auth_token}'}
     response = requests.get("http://management-user-service:8084/users/me", headers=headers)
-    return response.json(), response.status_code
+    return render_template('user.html', user_info=response.json())
 
 @app.route('/users/me', methods=['PUT'])
 def update_user():
     # Get form data instead of JSON data
+    auth_token = request.cookies.get('session_token')
+    if not auth_token:
+        return jsonify({"error": "Missing Authorization"}), 401
+    
+    headers = {'Authorization': f'Bearer {auth_token}'}
     data = {
         'username': request.form.get('username'),
         'password': request.form.get('password')
     }
 
-    response = requests.put("http://management-user-service:8084/users/me", json=data)
+    response = requests.put("http://management-user-service:8084/users/me", json=data, headers=headers)
     return response.json(), response.status_code
 
 @app.route('/users/me/password', methods=['PUT'])
 def change_password():
     # Get form data instead of JSON data
+    auth_token = request.cookies.get('session_token')
+    if not auth_token:
+        return jsonify({"error": "Missing Authorization"}), 401
+    
+    headers = {'Authorization': f'Bearer {auth_token}'}
     data = {
         'username': request.form.get('username'),
         'password': request.form.get('password')
     }
-    response = requests.put("http://management-user-service:8084/users/me/password", json=data)
+    response = requests.put("http://management-user-service:8084/users/me/password", json=data, headers=headers)
     return response.json(), response.status_code
 
 ########################################################
 # Songs management
 ########################################################
-
-@app.route('/songs', methods=['GET'])
-def get_songs():
-    response = requests.get("http://management-user-service:8084/songs")
-    return render_template('dashboard.html', songs=response.json())
 
 @app.route('/songs/<int:song_id>', methods=['GET']) 
 def get_song(song_id):
@@ -119,11 +138,12 @@ def get_artist_songs(artist_id):
 
 @app.route('/song', methods=['GET'])
 def get_songs_by_limit_and_offset():
-    data = request.json
-    limit = data.get('limit', 10)
-    offset = data.get('offset', 0)
+    data = {
+        'limit': request.args.get('limit', 10),
+        'offset': request.args.get('offset', 0)
+    }
     try:
-        response = requests.get("http://storage-service:8083/files", params={"limit": limit, "offset": offset})
+        response = requests.get("http://storage-service:8083/files", params=data)
         return response.json(), response.status_code
     except Exception as e:
         logger.error(f"Error getting songs: {str(e)}")
@@ -161,7 +181,7 @@ def upload_song():
             files={"file": file}
         )
         if response_storage.status_code != 201:
-            return response_storage.json(), response_storage.status_code
+            return response_storage.json()
         
         # Forward auth header to management service
         metadata = {
@@ -178,7 +198,8 @@ def upload_song():
             json=metadata,
             headers=headers
         )
-        return response_db.json(), response_db.status_code
+        # Convert response to JSON and pass it to template
+        return render_template('admin.html', song = response_db.json())
 
     except Exception as e:
         logger.error(f"Error uploading song: {str(e)}")
