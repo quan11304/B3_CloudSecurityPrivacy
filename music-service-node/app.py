@@ -29,10 +29,10 @@ def register():
     data = {
         'username': request.form.get('username'),
         'password': request.form.get('password'),
-        'email_address': request.form.get('email_address')
+        'email': request.form.get('email')
     }
     
-    required_fields = ['username', 'password', 'email_address']
+    required_fields = ['username', 'password', 'email']
     
     for field in required_fields:
         if not data[field]:
