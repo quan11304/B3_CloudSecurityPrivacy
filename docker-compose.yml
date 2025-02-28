@@ -13,7 +13,7 @@ services:
   # Music Service
   music-service-node:
     build: ./music-service-node
-    container_name: music-service-node
+    container_name: music-service
     ports:
       - "8080:8080"
     networks:
@@ -22,21 +22,20 @@ services:
       - database-service
       - management-user-service
       - storage-service
-      - logstash  # Phụ thuộc vào Logstash để gửi log
+      - logstash 
 
   # Management User Service
   management-user-service:
     build: ./management-node/management
-    container_name: management-user-service
+    container_name: management-user
     ports:
       - "8084:8084"
     networks:
       - music-network
     depends_on:
       - database-service
-      - logstash  # Phụ thuộc vào Logstash để gửi log
+      - logstash  
 
-  # Storage Service
   storage-service:
     build: ./storage-node/storage
     container_name: storage-service
@@ -47,11 +46,11 @@ services:
     networks:
       - music-network
     depends_on:
-      - logstash  # Phụ thuộc vào Logstash để gửi log
-
+      - logstash  
+      
   # ELK Stack
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    image: elasticsearch:7.17.9
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -62,7 +61,7 @@ services:
       - music-network
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.9
+    image: logstash:7.17.9
     container_name: logstash
     volumes:
       - ./elk-stack/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
@@ -76,7 +75,7 @@ services:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.9
+    image: kibana:7.17.9
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
@@ -88,7 +87,7 @@ services:
       - elasticsearch
 
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.17.9
+    image: metricbeat:7.17.9
     container_name: metricbeat
     user: root
     volumes:
