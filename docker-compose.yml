@@ -4,6 +4,7 @@ services:
   # Database Service
   database-service:
     build: ./storage-node/database
+    container_name: database-service
     ports:
       - "3306:3306"
     networks:
@@ -12,6 +13,7 @@ services:
   # Music Service
   music-service-node:
     build: ./music-service-node
+    container_name: music-service-node
     ports:
       - "8080:8080"
     networks:
@@ -20,22 +22,24 @@ services:
       - database-service
       - management-user-service
       - storage-service
-      - logstash  
+      - logstash  # Phụ thuộc vào Logstash để gửi log
 
   # Management User Service
   management-user-service:
     build: ./management-node/management
+    container_name: management-user-service
     ports:
       - "8084:8084"
     networks:
       - music-network
     depends_on:
       - database-service
-      - logstash 
+      - logstash  # Phụ thuộc vào Logstash để gửi log
 
   # Storage Service
   storage-service:
     build: ./storage-node/storage
+    container_name: storage-service
     ports:
       - "8083:8083"
     volumes:
@@ -43,42 +47,61 @@ services:
     networks:
       - music-network
     depends_on:
-      - logstash  
+      - logstash  # Phụ thuộc vào Logstash để gửi log
 
   # ELK Stack
   elasticsearch:
-    image: elasticsearch:7.17.9
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
+      - xpack.security.enabled=false
     ports:
       - "9200:9200"
     networks:
       - music-network
 
   logstash:
-    image: logstash:7.17.9
+    image: docker.elastic.co/logstash/logstash:7.17.9
     container_name: logstash
     volumes:
       - ./elk-stack/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     ports:
       - "5000:5000"
+      - "5044:5044"
+      - "9600:9600"
     networks:
       - music-network
     depends_on:
       - elasticsearch
 
   kibana:
-    image: kibana:7.17.9
+    image: docker.elastic.co/kibana/kibana:7.17.9
     container_name: kibana
-    ports:
-      - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
     networks:
       - music-network
     depends_on:
       - elasticsearch
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.17.9
+    container_name: metricbeat
+    user: root
+    volumes:
+      - ./elk-stack/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+    environment:
+      - setup.kibana.host=http://kibana:5601
+      - output.elasticsearch.hosts=["http://elasticsearch:9200"]
+    depends_on:
+      - elasticsearch
+    networks:
+      - music-network
 
 networks:
   music-network:
