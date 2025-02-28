@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Database Service
   database-service:
     build: ./storage-node/database
     ports:
@@ -8,6 +9,7 @@ services:
     networks:
       - music-network
 
+  # Music Service
   music-service-node:
     build: ./music-service-node
     ports:
@@ -18,7 +20,9 @@ services:
       - database-service
       - management-user-service
       - storage-service
+      - logstash  
 
+  # Management User Service
   management-user-service:
     build: ./management-node/management
     ports:
@@ -27,7 +31,9 @@ services:
       - music-network
     depends_on:
       - database-service
+      - logstash 
 
+  # Storage Service
   storage-service:
     build: ./storage-node/storage
     ports:
@@ -36,6 +42,43 @@ services:
       - storage-data:/data
     networks:
       - music-network
+    depends_on:
+      - logstash  
+
+  # ELK Stack
+  elasticsearch:
+    image: elasticsearch:7.17.9
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    networks:
+      - music-network
+
+  logstash:
+    image: logstash:7.17.9
+    container_name: logstash
+    volumes:
+      - ./elk-stack/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5000:5000"
+    networks:
+      - music-network
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: kibana:7.17.9
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - music-network
+    depends_on:
+      - elasticsearch
 
 networks:
   music-network:
@@ -43,4 +86,3 @@ networks:
 
 volumes:
   storage-data:
-
