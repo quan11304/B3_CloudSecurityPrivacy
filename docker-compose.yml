@@ -20,7 +20,7 @@ services:
       - database-service
       - management-user-service
       - storage-service
-      - logstash  # Phụ thuộc vào Logstash để gửi log
+      - logstash  
 
   # Management User Service
   management-user-service:
@@ -31,7 +31,7 @@ services:
       - music-network
     depends_on:
       - database-service
-      - logstash  # Phụ thuộc vào Logstash để gửi log
+      - logstash 
 
   # Storage Service
   storage-service:
@@ -43,7 +43,7 @@ services:
     networks:
       - music-network
     depends_on:
-      - logstash  # Phụ thuộc vào Logstash để gửi log
+      - logstash  
 
   # ELK Stack
   elasticsearch:
