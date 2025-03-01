@@ -4,7 +4,6 @@ services:
   # Database Service
   database-service:
     build: ./storage-node/database
-    container_name: database-service
     ports:
       - "3306:3306"
     networks:
@@ -13,7 +12,6 @@ services:
   # Music Service
   music-service-node:
     build: ./music-service-node
-    container_name: music-service
     ports:
       - "8080:8080"
     networks:
@@ -27,7 +25,6 @@ services:
   # Management User Service
   management-user-service:
     build: ./management-node/management
-    container_name: management-user
     ports:
       - "8084:8084"
     networks:
@@ -38,7 +35,6 @@ services:
 
   storage-service:
     build: ./storage-node/storage
-    container_name: storage-service
     ports:
       - "8083:8083"
     volumes:
@@ -50,32 +46,45 @@ services:
       
   # ELK Stack
   elasticsearch:
-    image: elasticsearch:7.17.9
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     networks:
       - music-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   logstash:
-    image: logstash:7.17.9
+    build: 
+      context: ./logs-node/logstash
+      dockerfile: Dockerfile
     container_name: logstash
     volumes:
-      - ./elk-stack/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logs-node/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     ports:
       - "5000:5000"
       - "5044:5044"
       - "9600:9600"
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
     networks:
       - music-network
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
   kibana:
-    image: kibana:7.17.9
+    image: docker.elastic.co/kibana/kibana:7.17.9
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
@@ -84,23 +93,29 @@ services:
     networks:
       - music-network
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:7.17.9
+    build:
+      context: ./logs-node/metricbeat
+      dockerfile: Dockerfile
     container_name: metricbeat
     user: root
     volumes:
-      - ./elk-stack/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./logs-node/metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
     environment:
       - setup.kibana.host=http://kibana:5601
       - output.elasticsearch.hosts=["http://elasticsearch:9200"]
-    depends_on:
-      - elasticsearch
     networks:
       - music-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_started
 
 networks:
   music-network:
@@ -108,3 +123,4 @@ networks:
 
 volumes:
   storage-data:
+  elasticsearch-data:
