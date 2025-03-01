@@ -10,10 +10,10 @@ metricbeat.modules:
     hostfs: "/"
 
 setup.kibana:
-  host: "http://kibana:5601"
+  host: "http://${KIBANA_HOST}:${KIBANA_PORT}"
 
 output.elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+  hosts: ["http://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}"]
 
 processors:
   - add_host_metadata: ~

@@ -20,8 +20,16 @@ STREAMING_QUALITY = {
     'high': {'bitrate': '320k', 'format': 'mp3'}
 }
 
+class Config:
+    LOGSTASH_URL = "http://logstash:5000"
+    STORAGE_SERVICE_URL = "http://storage-service:8083"
+    MANAGEMENT_USER_SERVICE_URL = "http://management-user-service:8084"
+    DATABASE_SERVICE_URL = "http://database-service:3306"
+
+app.config.from_object(Config)
+
 def send_log_to_logstash(log_data):
-    logstash_url = "http://logstash:5000"  # Địa chỉ Logstash trong Docker network
+    logstash_url = app.config['LOGSTASH_URL']
     headers = {'Content-Type': 'application/json'}
     try:
         response = requests.post(logstash_url, json=log_data, headers=headers)
@@ -101,7 +109,7 @@ def login():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    response = requests.get("http://management-user-service:8084/songs")
+    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/songs")
     return render_template('dashboard.html', songs=response.json())
 
 @app.route('/admin-dashboard', methods=['GET'])
@@ -111,7 +119,7 @@ def admin_dashboard():
         return jsonify({"error": "Missing Authorization"}), 401
     
     headers = {'Authorization': f'Bearer {auth_token}'}
-    response = requests.get("http://management-user-service:8084/check-admin", headers=headers)
+    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/check-admin", headers=headers)
     if response.status_code != 200:
         return jsonify({"error": "Not admin!!!"}), 401
     
@@ -131,7 +139,7 @@ def register():
         if not data[field]:
             return render_template('index.html', message=f"Missing required field: {field}"), 400
             
-    response = requests.post("http://management-user-service:8084/register", json=data)
+    response = requests.post(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/register", json=data)
     if response.status_code == 200 or response.status_code == 201:
         return render_template('index.html', message="User registered successfully")
     else:
@@ -144,7 +152,7 @@ def get_current_user():
         return jsonify({"error": "Missing Authorization"}), 401
     
     headers = {'Authorization': f'Bearer {auth_token}'}
-    response = requests.get("http://management-user-service:8084/users/me", headers=headers)
+    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me", headers=headers)
     return render_template('user.html', user_info=response.json())
 
 @app.route('/users/me', methods=['PUT'])
@@ -159,7 +167,7 @@ def update_user():
         'password': request.form.get('password')
     }
 
-    response = requests.put("http://management-user-service:8084/users/me", json=data, headers=headers)
+    response = requests.put(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me", json=data, headers=headers)
     return response.json(), response.status_code
 
 @app.route('/users/me/password', methods=['PUT'])
@@ -173,7 +181,7 @@ def change_password():
         'username': request.form.get('username'),
         'password': request.form.get('password')
     }
-    response = requests.put("http://management-user-service:8084/users/me/password", json=data, headers=headers)
+    response = requests.put(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me/password", json=data, headers=headers)
     return response.json(), response.status_code
 
 ########################################################
@@ -182,12 +190,12 @@ def change_password():
 
 @app.route('/songs/<int:song_id>', methods=['GET']) 
 def get_song(song_id):
-    response = requests.get(f"http://management-user-service:8084/songs/{song_id}")
+    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/songs/{song_id}")
     return response.json(), response.status_code
 
 @app.route('/artists/<int:artist_id>/songs', methods=['GET'])
 def get_artist_songs(artist_id):
-    response = requests.get(f"http://management-user-service:8084/artists/{artist_id}/songs")
+    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/artists/{artist_id}/songs")
     return response.json(), response.status_code
 
 @app.route('/song', methods=['GET'])
@@ -197,7 +205,7 @@ def get_songs_by_limit_and_offset():
         'offset': request.args.get('offset', 0)
     }
     try:
-        response = requests.get("http://storage-service:8083/files", params=data)
+        response = requests.get(f"{app.config['STORAGE_SERVICE_URL']}/files", params=data)
         return response.json(), response.status_code
     except Exception as e:
         logger.error(f"Error getting songs: {str(e)}")
@@ -206,7 +214,7 @@ def get_songs_by_limit_and_offset():
 @app.route('/download/<int:song_id>', methods=['GET'])
 def download_song(song_id):
     try:
-        response = requests.get(f"http://storage-service:8083/files/{song_id}")
+        response = requests.get(f"{app.config['STORAGE_SERVICE_URL']}/files/{song_id}")
         return response.json(), response.status_code
     except Exception as e:
         logger.error(f"Error downloading song: {str(e)}")
@@ -249,7 +257,7 @@ def upload_song():
             return jsonify({"error": "No selected file"}), 400
 
         response_storage = requests.post(
-            "http://storage-service:8083/upload", 
+            f"{app.config['STORAGE_SERVICE_URL']}/upload", 
             files={"file": file}
         )
         if response_storage.status_code != 201:
@@ -272,11 +280,11 @@ def upload_song():
             'album_id': request.form.get('album_id'),
             'genre': request.form.get('genre'),
             'duration': request.form.get('duration'),
-            'file_path': response_storage.json()['id']
+            'file_path': response_storage.json().get('id')
         }
 
         response_db = requests.post(
-            "http://management-user-service:8084/api/add_song", 
+            f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/api/add_song", 
             json=metadata,
             headers=headers
         )
@@ -332,12 +340,12 @@ def stream_song(song_id):
         username = "unknown"
 
         if auth_token:
-            user_info = requests.get("http://management-user-service:8084/users/me", 
+            user_info = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me", 
                                      headers={"Authorization": f"Bearer {auth_token}"})
             if user_info.status_code == 200:
                 username = user_info.json().get('username', 'unknown')
 
-        response = requests.get(f"http://management-user-service:8084/songs/{song_id}")
+        response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/songs/{song_id}")
         if response.status_code != 200:
             log_data = {
                 "timestamp": datetime.datetime.utcnow().isoformat(),
@@ -356,7 +364,7 @@ def stream_song(song_id):
         if not file_id:
             return jsonify({"error": "Song file not found"}), 404
 
-        storage_url = f"http://storage-service:8083/files/{file_id}"
+        storage_url = f"{app.config['STORAGE_SERVICE_URL']}/files/{file_id}"
         quality_settings = STREAMING_QUALITY[quality]
 
         log_data = {
@@ -427,7 +435,7 @@ def stream_song(song_id):
 @app.route('/metadata/<int:song_id>', methods=['GET'])
 def get_song_metadata(song_id):
     try:
-        response = requests.get(f"http://storage-service:8083/metadata/{song_id}")
+        response = requests.get(f"{app.config['STORAGE_SERVICE_URL']}/metadata/{song_id}")
         return response.json(), response.status_code
     except Exception as e:
         logger.error(f"Error getting song metadata: {str(e)}")
@@ -442,7 +450,7 @@ def delete_song(song_id):
 
         headers = {'Authorization': f'Bearer {auth_token}'}
         
-        response = requests.delete(f"http://storage-service:8083/files/{song_id}", headers=headers)
+        response = requests.delete(f"{app.config['STORAGE_SERVICE_URL']}/files/{song_id}", headers=headers)
 
         log_data = {
             "timestamp": datetime.datetime.utcnow().isoformat(),
