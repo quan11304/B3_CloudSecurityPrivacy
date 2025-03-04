@@ -21,10 +21,10 @@ STREAMING_QUALITY = {
 }
 
 class Config:
-    LOGSTASH_URL = "http://logstash:5000"
-    STORAGE_SERVICE_URL = "http://storage-service:8083"
-    MANAGEMENT_USER_SERVICE_URL = "http://management-user-service:8084"
-    DATABASE_SERVICE_URL = "http://database-service:3306"
+    LOGSTASH_URL = os.getenv('LOGSTASH_URL')
+    STORAGE_SERVICE_URL = os.getenv('STORAGE_SERVICE_URL')
+    MANAGEMENT_USER_SERVICE_URL = os.getenv('MANAGEMENT_USER_SERVICE_URL')
+    DATABASE_SERVICE_URL = os.getenv('DATABASE_SERVICE_URL')
 
 app.config.from_object(Config)
 
@@ -75,7 +75,7 @@ def login():
         'username': request.form.get('username'),
         'password': request.form.get('password')
     }
-    response = requests.post("http://management-user-service:8084/login", json=data)
+    response = requests.post(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/login", json=data)
 
     log_data = {
         "timestamp": datetime.datetime.utcnow().isoformat(),

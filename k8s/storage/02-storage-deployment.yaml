@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-service
+  namespace: music-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage-service
+  template:
+    metadata:
+      labels:
+        app: storage-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: moonlight
+      containers:
+      - name: storage
+        image: storage-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8083
+        volumeMounts:
+        - name: storage-data
+          mountPath: /storage
+      volumes:
+      - name: storage-data
+        persistentVolumeClaim:
+          claimName: storage-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-service
+  namespace: music-app
+spec:
+  selector:
+    app: storage-service
+  ports:
+  - port: 8083
+    targetPort: 8083

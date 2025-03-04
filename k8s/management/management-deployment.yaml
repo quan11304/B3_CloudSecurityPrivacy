@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: management-user-service
+  namespace: music-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: management-user-service
+  template:
+    metadata:
+      labels:
+        app: management-user-service
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: mintonlatitude5400
+      containers:
+      - name: management
+        image: management-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8084
+        env:
+        - name: JWT_SECRET_KEY
+          value: "hsw109"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: management-user-service
+  namespace: music-app
+spec:
+  selector:
+    app: management-user-service
+  ports:
+  - port: 8084
+    targetPort: 8084

@@ -1,0 +1,171 @@
+# Elasticsearch
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: music-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: laptop-4bogorq8
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: xpack.security.enabled
+          value: "false"
+        - name: ingest.geoip.downloader.enabled
+          value: "false"
+        ports:
+        - containerPort: 9200
+---
+# Elasticsearch Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: music-app
+spec:
+  ports:
+    - port: 9200
+      targetPort: 9200
+  selector:
+    app: elasticsearch
+---
+# Logstash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: music-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: laptop-4bogorq8
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:7.17.9
+        ports:
+        - containerPort: 5000
+        env:
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/pipeline/
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-config
+---
+# Logstash Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  namespace: music-app
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: logstash
+---
+# Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: music-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: laptop-4bogorq8
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:7.17.9
+        ports:
+        - containerPort: 5601
+
+---
+# Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: music-app
+spec:
+  type: NodePort
+  selector:
+    app: kibana
+  ports:
+    - port: 5601
+      targetPort: 5601
+      nodePort: 30000  # This will expose Kibana on port 30000 on all nodes
+---
+# Metricbeat Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metricbeat
+  namespace: music-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metricbeat
+  template:
+    metadata:
+      labels:
+        app: metricbeat
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: laptop-4bogorq8
+      containers:
+      - name: metricbeat
+        image: docker.elastic.co/beats/metricbeat:7.17.9
+
+---
+# Logstash ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: music-app
+data:
+  logstash.conf: |
+    input {
+      http {
+        port => 5000
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]
+        index => "music-app-%{+YYYY.MM.dd}"
+      }
+    }

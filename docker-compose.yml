@@ -21,6 +21,11 @@ services:
       - management-user-service
       - storage-service
       - logstash 
+    environment:
+      - LOGSTASH_URL=http://logstash:5000
+      - STORAGE_SERVICE_URL=http://storage-service:8083
+      - MANAGEMENT_USER_SERVICE_URL=http://management-user-service:8084
+      - DATABASE_SERVICE_URL=http://database-service:3306
 
   # Management User Service
   management-user-service:
