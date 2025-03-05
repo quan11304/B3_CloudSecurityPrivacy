@@ -38,6 +38,14 @@ def send_log_to_logstash(log_data):
     except Exception as e:
         logger.error(f"Failed to send log to Logstash: {str(e)}")
 
+def get_current_user():
+    auth_token = request.cookies.get('session_token')
+    if not auth_token:
+        return jsonify({"error": "Missing Authorization"}), 401
+
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    return requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me", headers=headers)
+
 # Middleware logging request
 @app.before_request
 def log_request():
@@ -146,14 +154,10 @@ def register():
         return render_template('index.html', message=response.content.decode('utf-8'))
 
 @app.route('/users/me', methods=['GET'])
-def get_current_user():
-    auth_token = request.cookies.get('session_token')
-    if not auth_token:
-        return jsonify({"error": "Missing Authorization"}), 401
-    
-    headers = {'Authorization': f'Bearer {auth_token}'}
-    response = requests.get(f"{app.config['MANAGEMENT_USER_SERVICE_URL']}/users/me", headers=headers)
+def display_user():
+    response = get_current_user()
     return render_template('user.html', user_info=response.json())
+
 
 @app.route('/users/me', methods=['PUT'])
 def update_user():
